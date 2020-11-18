@@ -98,8 +98,8 @@ class ResNet(nn.Module):
         out = self.layer2(out)
         out = self.layer3(out)
         out = self.layer4(out)
-        out = F.avg_pool2d(out, 4)
-        out = out.view(out.size(0), -1)
+        out = F.avg_pool2d(out, 4)  # kernel size = 4，用的average pooling
+        out = out.view(out.size(0), -1)  # 把输入展平，这样就不用在意输入图片的尺寸。out.size(0)为输入的第一维(batchsize),而-1指在不告诉函数有多少列的情况下，根据原tensor数据和batchsize自动分配列数。
         out = self.linear(out)
         return out
 

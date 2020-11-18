@@ -1,6 +1,7 @@
 '''Train CIFAR10 with PyTorch.'''
 import torch
 import torch.nn as nn
+import torch.utils.data
 import torch.optim as optim
 import torch.nn.functional as F
 import torch.backends.cudnn as cudnn
@@ -28,7 +29,7 @@ start_epoch = 0  # start from epoch 0 or last checkpoint epoch
 # Data
 print('==> Preparing data..')
 transform_train = transforms.Compose([
-    transforms.RandomCrop(32, padding=4),
+    transforms.RandomCrop(32, padding=4),  # 40 * 40
     transforms.RandomHorizontalFlip(),
     transforms.ToTensor(),
     transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
@@ -55,7 +56,7 @@ classes = ('plane', 'car', 'bird', 'cat', 'deer',
 # Model
 print('==> Building model..')
 # net = VGG('VGG19')
-# net = ResNet18()
+net = ResNet18()
 # net = PreActResNet18()
 # net = GoogLeNet()
 # net = DenseNet121()
@@ -67,11 +68,11 @@ print('==> Building model..')
 # net = SENet18()
 # net = ShuffleNetV2(1)
 # net = EfficientNetB0()
-net = RegNetX_200MF()
+# net = RegNetX_200MF()
 net = net.to(device)
 if device == 'cuda':
-    net = torch.nn.DataParallel(net)
-    cudnn.benchmark = True
+    net = torch.nn.DataParallel(net)  # DataParallel 多台gpu加速
+    cudnn.benchmark = True  # 设置这个 flag 可以让内置的 cuDNN 的 auto-tuner 自动寻找最适合当前配置的高效算法，来达到优化运行效率的问题
 
 if args.resume:
     # Load checkpoint.
@@ -96,7 +97,7 @@ def train(epoch):
     total = 0
     for batch_idx, (inputs, targets) in enumerate(trainloader):
         inputs, targets = inputs.to(device), targets.to(device)
-        optimizer.zero_grad()
+        optimizer.zero_grad()  # 梯度清零
         outputs = net(inputs)
         loss = criterion(outputs, targets)
         loss.backward()
